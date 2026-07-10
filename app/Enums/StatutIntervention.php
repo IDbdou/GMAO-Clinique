@@ -2,11 +2,13 @@
 
 namespace App\Enums;
 
+use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
 enum StatutIntervention: string implements HasLabel, HasColor
 {
+    case Nouveau = 'nouveau';
     case Ouverte = 'ouverte';
     case EnCours = 'en_cours';
     case EnAttente = 'en_attente';
@@ -16,6 +18,7 @@ enum StatutIntervention: string implements HasLabel, HasColor
     public function getLabel(): string
     {
         return match ($this) {
+            self::Nouveau => 'Nouveau',
             self::Ouverte => 'Ouverte',
             self::EnCours => 'En cours',
             self::EnAttente => 'En attente',
@@ -24,9 +27,10 @@ enum StatutIntervention: string implements HasLabel, HasColor
         };
     }
 
-    public function getColor(): string
+    public function getColor(): string|array
     {
         return match ($this) {
+            self::Nouveau => Color::Purple,
             self::Ouverte => 'info',
             self::EnCours => 'warning',
             self::EnAttente => 'gray',

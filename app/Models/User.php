@@ -35,13 +35,20 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Détermine qui peut accéder au panneau Filament /admin.
+     * Détermine qui peut accéder à chaque panneau Filament.
      *
-     * Pour l'instant : uniquement les comptes actifs ayant le rôle Admin ou Technicien.
-     * Les Agents auront une interface dédiée plus tard.
+     * - Panneau /admin  : comptes actifs avec le rôle Admin ou Technicien.
+     * - Panneau /agent  : comptes actifs avec le rôle Agent (interface simplifiée).
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->actif && $this->hasAnyRole(['Admin', 'Technicien']);
+        if (! $this->actif) {
+            return false;
+        }
+
+        return match ($panel->getId()) {
+            'agent' => $this->hasRole('Agent'),
+            default => $this->hasAnyRole(['Admin', 'Technicien']),
+        };
     }
 }
