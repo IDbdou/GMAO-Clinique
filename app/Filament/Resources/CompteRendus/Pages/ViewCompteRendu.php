@@ -3,7 +3,10 @@
 namespace App\Filament\Resources\CompteRendus\Pages;
 
 use App\Filament\Resources\CompteRendus\CompteRenduResource;
+use App\Models\CompteRendu;
 use Filament\Actions\Action;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -13,43 +16,113 @@ class ViewCompteRendu extends ViewRecord
 {
     protected static string $resource = CompteRenduResource::class;
 
-    protected static ?string $title = 'Détail du compte-rendu';
+    protected static ?string $title = 'Compte-rendu d\'intervention';
 
     public function infolist(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Section::make('Intervention')
-                    ->columns(2)
+                Section::make(fn (CompteRendu $record): string => "Compte-rendu n° CR-{$record->id} / Intervention : {$record->intervention?->titre}")
+                    ->description(fn (CompteRendu $record): string => 'Établi le ' . ($record->date_soumission?->format('d/m/Y H:i') ?? '—'))
+                    ->icon('heroicon-m-clipboard-document-check')
                     ->schema([
-                        TextEntry::make('intervention.titre')->label('Titre'),
-                        TextEntry::make('intervention.equipement.nom')->label('Équipement'),
-                        TextEntry::make('intervention.service.nom')->label('Service'),
-                        TextEntry::make('technicien.name')->label('Technicien'),
+                        Grid::make(2)
+                            ->schema([
+                                Group::make([
+                                    TextEntry::make('intervention.service.nom')
+                                        ->label('Service demandeur')
+                                        ->placeholder('—'),
+                                    TextEntry::make('intervention.equipement.nom')
+                                        ->label('Équipement concerné')
+                                        ->placeholder('—'),
+                                    TextEntry::make('intervention.equipement.numero_serie')
+                                        ->label('N° série')
+                                        ->placeholder('—'),
+                                ]),
+                                Group::make([
+                                    TextEntry::make('technicien.name')
+                                        ->label('Technicien intervenant')
+                                        ->placeholder('—'),
+                                    TextEntry::make('intervention.date_demande')
+                                        ->label('Date de la demande')
+                                        ->dateTime('d/m/Y H:i')
+                                        ->placeholder('—'),
+                                    TextEntry::make('intervention.date_fin')
+                                        ->label('Date de clôture')
+                                        ->dateTime('d/m/Y H:i')
+                                        ->placeholder('—'),
+                                ]),
+                            ]),
                     ]),
 
-                Section::make('Compte-rendu technique')
+                Section::make('Rapport technique')
+                    ->icon('heroicon-m-wrench-screwdriver')
+                    ->schema([
+                        TextEntry::make('observations')
+                            ->label('Observations / travaux réalisés')
+                            ->placeholder('Aucune observation')
+                            ->columnSpanFull(),
+                        TextEntry::make('pieces_utilisees')
+                            ->label('Pièces et consommables utilisés')
+                            ->placeholder('Aucune pièce')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Détail des coûts')
+                    ->icon('heroicon-m-currency-dirham')
+                    ->columns(4)
+                    ->schema([
+                        TextEntry::make('temps_passe')
+                            ->label('Temps passé')
+                            ->suffix(' h')
+                            ->placeholder('—'),
+                        TextEntry::make('cout_main_oeuvre')
+                            ->label('Main d\'œuvre')
+                            ->money('MAD')
+                            ->placeholder('—'),
+                        TextEntry::make('cout_pieces')
+                            ->label('Pièces / consommables')
+                            ->money('MAD')
+                            ->placeholder('—'),
+                        TextEntry::make('cout_total')
+                            ->label('Coût total')
+                            ->money('MAD')
+                            ->placeholder('—')
+                            ->weight('bold'),
+                    ]),
+
+                Section::make('Validation du service')
+                    ->icon('heroicon-m-shield-check')
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('observations')->label('Observations')->columnSpanFull(),
-                        TextEntry::make('pieces_utilisees')->label('Pièces utilisées')->columnSpanFull(),
-                        TextEntry::make('temps_passe')->label('Temps passé')->suffix(' h'),
-                        TextEntry::make('cout_total')->label('Coût total')->money('MAD'),
+                        TextEntry::make('statut')
+                            ->label('Statut')
+                            ->badge()
+                            ->columnSpanFull(),
+                        TextEntry::make('signature_chef_service')
+                            ->label('Validé / refusé par')
+                            ->placeholder('En attente de validation'),
+                        TextEntry::make('date_validation')
+                            ->label('Date de validation')
+                            ->dateTime('d/m/Y H:i')
+                            ->placeholder('—'),
+                        TextEntry::make('commentaire_validation')
+                            ->label('Commentaire du chef de service')
+                            ->placeholder('—')
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Signatures')
+                    ->icon('heroicon-m-pencil-square')
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('signature_technicien')->label('Technicien'),
-                        TextEntry::make('date_soumission')->label('Date soumission')->dateTime('d/m/Y H:i'),
-                        TextEntry::make('signature_chef_service')->label('Chef de service')->placeholder('—'),
-                        TextEntry::make('date_validation')->label('Date validation')->dateTime('d/m/Y H:i')->placeholder('—'),
-                    ]),
-
-                Section::make('Validation')
-                    ->schema([
-                        TextEntry::make('statut')->label('Statut')->badge(),
-                        TextEntry::make('commentaire_validation')->label('Commentaire chef de service')->placeholder('—')->columnSpanFull(),
+                        TextEntry::make('signature_technicien')
+                            ->label('Signature du technicien')
+                            ->placeholder('—'),
+                        TextEntry::make('date_soumission')
+                            ->label('Date de soumission')
+                            ->dateTime('d/m/Y H:i')
+                            ->placeholder('—'),
                     ]),
             ]);
     }
@@ -57,13 +130,13 @@ class ViewCompteRendu extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('download')
-                ->label('Télécharger PDF')
-                ->icon('heroicon-m-arrow-down-tray')
+            Action::make('print')
+                ->label('Imprimer / PDF')
+                ->icon('heroicon-m-printer')
                 ->color('primary')
-                ->url(fn () => '#')
-                ->openUrlInNewTab()
-                ->visible(false),
+                ->extraAttributes([
+                    'onclick' => 'window.print()',
+                ]),
         ];
     }
 }

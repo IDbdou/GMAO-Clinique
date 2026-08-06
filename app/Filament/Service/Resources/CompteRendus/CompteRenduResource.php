@@ -60,7 +60,7 @@ class CompteRenduResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return \App\Filament\Resources\CompteRendus\Tables\CompteRendusTable::configure($table);
+        return \App\Filament\Service\Resources\CompteRendus\Tables\CompteRendusTable::configure($table);
     }
 
     public static function getPages(): array
