@@ -83,7 +83,17 @@ class InterventionForm
                             )
                             ->searchable()
                             ->preload()
-                            ->placeholder('Non assigné'),
+                            ->placeholder('Non assigné')
+                            ->hint('Laissez vide si non assigné. Le technicien pourra se l\'attribuer via "Prendre en charge".'),
+
+                        Select::make('demandeur_id')
+                            ->label('Demandeur')
+                            ->relationship('demandeur', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->disabled()
+                            ->dehydrated()
+                            ->placeholder('—'),
 
                         Textarea::make('description')
                             ->label('Description')
@@ -116,15 +126,17 @@ class InterventionForm
                             ->displayFormat('d/m/Y H:i'),
 
                         TextInput::make('cout')
-                            ->label('Coût')
+                            ->label('Coût total')
                             ->numeric()
                             ->minValue(0)
-                            ->prefix('MAD'),
+                            ->prefix('MAD')
+                            ->hint('Main d\'œuvre + pièces détachées + divers.'),
 
                         Textarea::make('rapport')
-                            ->label('Compte-rendu')
-                            ->rows(3)
-                            ->columnSpanFull(),
+                            ->label('Compte-rendu du technicien')
+                            ->placeholder('Décrivez les actions réalisées, pièces remplacées, observations...')
+                            ->rows(5)
+                            ->columnSpanFull()
                     ]),
             ]);
     }

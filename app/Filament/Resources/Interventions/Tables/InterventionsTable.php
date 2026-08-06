@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Interventions\Tables;
 use App\Enums\PrioriteIntervention;
 use App\Enums\StatutIntervention;
 use App\Enums\TypeIntervention;
+use App\Models\Intervention;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -97,6 +99,51 @@ class InterventionsTable
             ])
             ->recordActions([
                 EditAction::make(),
+
+                // Action rapide : Prendre en charge / Ouvrir
+                Action::make('prendreEnCharge')
+                    ->label('Prendre en charge')
+                    ->icon('heroicon-m-hand-thumb-up')
+                    ->color('warning')
+                    ->visible(fn (Intervention $record): bool => in_array($record->statut, [StatutIntervention::Nouveau, StatutIntervention::Ouverte]))
+                    ->requiresConfirmation()
+                    ->modalHeading('Prendre en charge l\'intervention')
+                    ->action(function (Intervention $record): void {
+                        $record->update([
+                            'statut' => StatutIntervention::EnCours,
+                            'technicien_id' => auth()->id(),
+                            'date_debut' => $record->date_debut ?? now(),
+                        ]);
+                    }),
+
+                // Action rapide : Clôturer
+                Action::make('cloturer')
+                    ->label('Clôturer')
+                    ->icon('heroicon-m-check-circle')
+                    ->color('success')
+                    ->visible(fn (Intervention $record): bool => in_array($record->statut, [StatutIntervention::Nouveau, StatutIntervention::Ouverte, StatutIntervention::EnCours, StatutIntervention::EnAttente]))
+                    ->requiresConfirmation()
+                    ->modalHeading('Clôturer l\'intervention')
+                    ->action(function (Intervention $record): void {
+                        $record->update([
+                            'statut' => StatutIntervention::Terminee,
+                            'date_fin' => now(),
+                        ]);
+                    }),
+
+                // Action rapide : Annuler
+                Action::make('annuler')
+                    ->label('Annuler')
+                    ->icon('heroicon-m-x-circle')
+                    ->color('danger')
+                    ->visible(fn (Intervention $record): bool => ! in_array($record->statut, [StatutIntervention::Terminee, StatutIntervention::Annulee]))
+                    ->requiresConfirmation()
+                    ->modalHeading('Annuler l\'intervention')
+                    ->action(function (Intervention $record): void {
+                        $record->update([
+                            'statut' => StatutIntervention::Annulee,
+                        ]);
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

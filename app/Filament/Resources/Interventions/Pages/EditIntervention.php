@@ -16,4 +16,14 @@ class EditIntervention extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Si une date de fin est saisie, forcer le statut à Terminée.
+        if (filled($data['date_fin'] ?? null) && $data['statut'] !== \App\Enums\StatutIntervention::Terminee->value) {
+            $data['statut'] = \App\Enums\StatutIntervention::Terminee->value;
+        }
+
+        return $data;
+    }
 }
