@@ -8,8 +8,10 @@ use App\Enums\TypeIntervention;
 use App\Models\Intervention;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -144,6 +146,14 @@ class InterventionsTable
                             'statut' => StatutIntervention::Annulee,
                         ]);
                     }),
+
+                // Bouton compte-rendu pour le technicien
+                Action::make('compteRendu')
+                    ->label('Compte-rendu')
+                    ->icon('heroicon-m-clipboard-document-check')
+                    ->color('info')
+                    ->visible(fn (Intervention $record): bool => in_array($record->statut, [StatutIntervention::Nouveau, StatutIntervention::Ouverte, StatutIntervention::EnCours, StatutIntervention::EnAttente]))
+                    ->url(fn (Intervention $record): string => route('filament.admin.resources.compte-rendus.create', ['intervention' => $record->id])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -49,4 +49,9 @@ class Intervention extends Model
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function compteRendu(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(CompteRendu::class);
+    }
 }
