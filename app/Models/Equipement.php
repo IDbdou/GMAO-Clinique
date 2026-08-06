@@ -6,11 +6,12 @@ use App\Enums\Criticite;
 use App\Enums\StatutEquipement;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'nom', 'code_inventaire', 'numero_serie', 'marque', 'modele',
-    'service', 'localisation', 'criticite', 'statut',
+    'service_id', 'localisation', 'criticite', 'statut',
     'date_mise_en_service', 'fournisseur', 'notes',
 ])]
 class Equipement extends Model
@@ -27,5 +28,10 @@ class Equipement extends Model
     public function interventions(): HasMany
     {
         return $this->hasMany(Intervention::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 }

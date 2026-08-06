@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'equipement_id', 'technicien_id', 'demandeur_id', 'titre', 'type', 'priorite', 'statut',
+    'equipement_id', 'service_id', 'technicien_id', 'demandeur_id', 'titre', 'type', 'priorite', 'statut',
     'description', 'rapport', 'date_demande', 'date_planifiee',
     'date_debut', 'date_fin', 'cout',
 ])]
@@ -43,5 +43,10 @@ class Intervention extends Model
     public function demandeur(): BelongsTo
     {
         return $this->belongsTo(User::class, 'demandeur_id');
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 }

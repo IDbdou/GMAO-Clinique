@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Agent\Resources\Signalements\Pages\CreateSignalement;
-use App\Filament\Agent\Resources\Signalements\SignalementResource;
+use App\Filament\Service\Resources\Signalements\Pages\CreateSignalement;
+use App\Filament\Service\Resources\Signalements\SignalementResource;
 use App\Models\Equipement;
 use App\Models\Intervention;
+use App\Models\Service;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,29 +22,39 @@ class FilamentGmaoTest extends TestCase
     {
         parent::setUp();
 
-        foreach (['Admin', 'Technicien', 'Agent'] as $role) {
+        foreach (['Admin', 'Technicien', 'Chef de service'] as $role) {
             Role::create(['name' => $role, 'guard_name' => 'web']);
         }
     }
 
-    private function makeUser(string $role, bool $actif = true, ?string $email = null): User
+    private function makeUser(string $role, bool $actif = true, ?string $email = null, ?Service $service = null): User
     {
         $user = User::create([
             'name' => "Test {$role}",
-            'email' => $email ?? strtolower($role) . '@test.local',
+            'email' => $email ?? strtolower(str_replace(' ', '-', $role)) . '@test.local',
             'password' => 'password',
             'actif' => $actif,
+            'service_id' => $service?->id,
         ]);
         $user->assignRole($role);
 
         return $user;
     }
 
-    private function makeEquipement(string $code = 'EQ-1'): Equipement
+    private function makeService(string $code = 'RAD'): Service
+    {
+        return Service::create([
+            'nom' => "Service {$code}",
+            'code' => $code,
+        ]);
+    }
+
+    private function makeEquipement(Service $service, string $code = 'EQ-1'): Equipement
     {
         return Equipement::create([
             'nom' => "Équipement {$code}",
             'code_inventaire' => $code,
+            'service_id' => $service->id,
         ]);
     }
 
@@ -60,6 +71,7 @@ class FilamentGmaoTest extends TestCase
         $this->get('/admin/equipements/create')->assertOk();
         $this->get('/admin/interventions')->assertOk();
         $this->get('/admin/interventions/create')->assertOk();
+        $this->get('/admin/services')->assertOk();
     }
 
     public function test_technicien_accede_au_panneau_mais_pas_au_module_utilisateurs(): void
@@ -69,11 +81,13 @@ class FilamentGmaoTest extends TestCase
         $this->get('/admin/equipements')->assertOk();
         $this->get('/admin/interventions')->assertOk();
         $this->get('/admin/users')->assertForbidden();
+        $this->get('/admin/services')->assertForbidden();
     }
 
-    public function test_agent_ne_peut_pas_acceder_au_panneau_admin(): void
+    public function test_chef_de_service_ne_peut_pas_acceder_au_panneau_admin(): void
     {
-        $this->actingAs($this->makeUser('Agent'));
+        $service = $this->makeService();
+        $this->actingAs($this->makeUser('Chef de service', service: $service));
 
         $this->get('/admin')->assertStatus(403);
     }
@@ -85,33 +99,36 @@ class FilamentGmaoTest extends TestCase
         $this->get('/admin')->assertStatus(403);
     }
 
-    // ----- Panneau /agent -----
+    // ----- Panneau /service -----
 
-    public function test_agent_accede_a_son_espace_signalements(): void
+    public function test_chef_de_service_accede_a_son_espace_signalements(): void
     {
-        $this->actingAs($this->makeUser('Agent'));
+        $service = $this->makeService();
+        $this->actingAs($this->makeUser('Chef de service', service: $service));
 
-        $this->get('/agent')->assertOk();
-        $this->get('/agent/signalements')->assertOk();
-        $this->get('/agent/signalements/create')->assertOk();
+        $this->get('/service')->assertOk();
+        $this->get('/service/signalements')->assertOk();
+        $this->get('/service/signalements/create')->assertOk();
+        $this->get('/service/equipements')->assertOk();
     }
 
-    public function test_admin_et_technicien_ne_peuvent_pas_acceder_au_panneau_agent(): void
+    public function test_admin_et_technicien_ne_peuvent_pas_acceder_au_panneau_service(): void
     {
         $this->actingAs($this->makeUser('Admin'));
-        $this->get('/agent')->assertStatus(403);
+        $this->get('/service')->assertStatus(403);
 
         $this->actingAs($this->makeUser('Technicien'));
-        $this->get('/agent')->assertStatus(403);
+        $this->get('/service')->assertStatus(403);
     }
 
-    public function test_agent_signale_une_panne_cree_une_intervention_corrective_nouvelle(): void
+    public function test_chef_de_service_signale_une_panne_cree_une_intervention_corrective_nouvelle(): void
     {
-        $agent = $this->makeUser('Agent');
-        $this->actingAs($agent);
-        Filament::setCurrentPanel('agent');
+        $service = $this->makeService();
+        $chef = $this->makeUser('Chef de service', service: $service);
+        $this->actingAs($chef);
+        Filament::setCurrentPanel('service');
 
-        $equipement = $this->makeEquipement('SCAN-1');
+        $equipement = $this->makeEquipement($service, 'SCAN-1');
 
         Livewire::test(CreateSignalement::class)
             ->fillForm([
@@ -124,8 +141,9 @@ class FilamentGmaoTest extends TestCase
 
         $this->assertDatabaseHas('interventions', [
             'equipement_id' => $equipement->id,
-            'demandeur_id' => $agent->id,
-            'type' => 'curatif',      // corrective
+            'demandeur_id' => $chef->id,
+            'service_id' => $service->id,
+            'type' => 'curatif',
             'statut' => 'nouveau',
             'priorite' => 'haute',
         ]);
@@ -135,15 +153,21 @@ class FilamentGmaoTest extends TestCase
         $this->assertNull($intervention->technicien_id);
     }
 
-    public function test_agent_ne_voit_que_ses_propres_signalements(): void
+    public function test_chef_de_service_ne_voit_que_les_signalements_de_son_service(): void
     {
-        $agentA = $this->makeUser('Agent', email: 'a@test.local');
-        $agentB = $this->makeUser('Agent', email: 'b@test.local');
-        $equipement = $this->makeEquipement('EQ-9');
+        $serviceA = $this->makeService('RAD');
+        $serviceB = $this->makeService('BLOC');
+
+        $chefA = $this->makeUser('Chef de service', email: 'a@test.local', service: $serviceA);
+        $this->makeUser('Chef de service', email: 'b@test.local', service: $serviceB);
+
+        $equipementA = $this->makeEquipement($serviceA, 'EQ-A');
+        $equipementB = $this->makeEquipement($serviceB, 'EQ-B');
 
         Intervention::create([
-            'equipement_id' => $equipement->id,
-            'demandeur_id' => $agentA->id,
+            'equipement_id' => $equipementA->id,
+            'service_id' => $serviceA->id,
+            'demandeur_id' => $chefA->id,
             'titre' => 'Signalement A',
             'type' => 'curatif',
             'statut' => 'nouveau',
@@ -151,8 +175,9 @@ class FilamentGmaoTest extends TestCase
             'date_demande' => now(),
         ]);
         Intervention::create([
-            'equipement_id' => $equipement->id,
-            'demandeur_id' => $agentB->id,
+            'equipement_id' => $equipementB->id,
+            'service_id' => $serviceB->id,
+            'demandeur_id' => $chefA->id,
             'titre' => 'Signalement B',
             'type' => 'curatif',
             'statut' => 'nouveau',
@@ -160,9 +185,9 @@ class FilamentGmaoTest extends TestCase
             'date_demande' => now(),
         ]);
 
-        $this->actingAs($agentA);
-        $ids = SignalementResource::getEloquentQuery()->pluck('demandeur_id')->unique()->all();
+        $this->actingAs($chefA);
+        $serviceIds = SignalementResource::getEloquentQuery()->pluck('service_id')->unique()->all();
 
-        $this->assertSame([$agentA->id], $ids);
+        $this->assertSame([$serviceA->id], $serviceIds);
     }
 }

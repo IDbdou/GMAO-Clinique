@@ -30,6 +30,12 @@ class InterventionsTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('service.nom')
+                    ->label('Service')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+
                 TextColumn::make('type')
                     ->label('Type')
                     ->badge()
@@ -84,6 +90,10 @@ class InterventionsTable
                     ->relationship('equipement', 'nom')
                     ->searchable()
                     ->preload(),
+
+                SelectFilter::make('service')
+                    ->label('Service')
+                    ->relationship('service', 'nom'),
             ])
             ->recordActions([
                 EditAction::make(),

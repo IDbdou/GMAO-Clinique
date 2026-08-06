@@ -27,7 +27,22 @@ class InterventionForm
                             ->relationship('equipement', 'nom')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function (callable $set, $state) {
+                                $equipement = \App\Models\Equipement::find($state);
+                                $set('service_id', $equipement?->service_id);
+                            }),
+
+                        Select::make('service_id')
+                            ->label('Service')
+                            ->relationship('service', 'nom')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->disabled()
+                            ->dehydrated()
+                            ->native(false),
 
                         TextInput::make('titre')
                             ->label('Titre')

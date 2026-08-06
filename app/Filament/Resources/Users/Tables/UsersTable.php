@@ -34,11 +34,11 @@ class UsersTable
                     ->color(fn (string $state): string => match ($state) {
                         'Admin' => 'danger',
                         'Technicien' => 'warning',
-                        'Agent' => 'info',
+                        'Chef de service' => 'info',
                         default => 'gray',
                     }),
 
-                TextColumn::make('service')
+                TextColumn::make('service.nom')
                     ->label('Service')
                     ->searchable()
                     ->placeholder('—')
@@ -59,6 +59,10 @@ class UsersTable
                 SelectFilter::make('roles')
                     ->label('Rôle')
                     ->relationship('roles', 'name'),
+
+                SelectFilter::make('service')
+                    ->label('Service')
+                    ->relationship('service', 'nom'),
 
                 TernaryFilter::make('actif')
                     ->label('Statut')

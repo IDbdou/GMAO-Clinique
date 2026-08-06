@@ -51,10 +51,13 @@ class EquipementForm
                 Section::make('Affectation & état')
                     ->columns(2)
                     ->schema([
-                        TextInput::make('service')
+                        Select::make('service_id')
                             ->label('Service')
-                            ->placeholder('Ex : Radiologie, Hémodialyse, Bloc opératoire…')
-                            ->maxLength(255),
+                            ->relationship('service', 'nom')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->native(false),
 
                         TextInput::make('localisation')
                             ->label('Localisation')

@@ -27,7 +27,7 @@ class EquipementsTable
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('service')
+                TextColumn::make('service.nom')
                     ->label('Service')
                     ->searchable()
                     ->placeholder('—')
@@ -60,12 +60,7 @@ class EquipementsTable
             ->filters([
                 SelectFilter::make('service')
                     ->label('Service')
-                    ->options(fn (): array => \App\Models\Equipement::query()
-                        ->whereNotNull('service')
-                        ->distinct()
-                        ->orderBy('service')
-                        ->pluck('service', 'service')
-                        ->all()),
+                    ->relationship('service', 'nom'),
 
                 SelectFilter::make('criticite')
                     ->label('Criticité')

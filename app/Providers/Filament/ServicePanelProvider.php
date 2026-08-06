@@ -11,7 +11,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -19,30 +18,26 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class ServicePanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('service')
+            ->path('service')
+            ->brandName('GMAO — Espace Chef de service')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverResources(in: app_path('Filament/Service/Resources'), for: 'App\Filament\Service\Resources')
+            ->discoverPages(in: app_path('Filament/Service/Pages'), for: 'App\Filament\Service\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                \App\Filament\Widgets\GmaoStatsOverview::class,
-                \App\Filament\Widgets\DerniersSignalements::class,
-                \App\Filament\Widgets\EquipementsEnPanne::class,
+                \App\Filament\Service\Widgets\ServiceStatsOverview::class,
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

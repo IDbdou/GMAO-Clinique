@@ -9,11 +9,12 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'service', 'actif'])]
+#[Fillable(['name', 'email', 'password', 'service_id', 'actif'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -47,8 +48,13 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return match ($panel->getId()) {
-            'agent' => $this->hasRole('Agent'),
+            'service' => $this->hasRole('Chef de service'),
             default => $this->hasAnyRole(['Admin', 'Technicien']),
         };
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 }

@@ -41,16 +41,22 @@ class UserForm
                     ->options([
                         'Admin' => 'Admin',
                         'Technicien' => 'Technicien',
-                        'Agent' => 'Agent',
+                        'Chef de service' => 'Chef de service',
                     ])
                     ->required()
-                    ->native(false),
+                    ->native(false)
+                    ->live()
+                    ->afterStateUpdated(fn (callable $set, $state) => $state === 'Admin' ? $set('service_id', null) : null),
 
-                TextInput::make('service')
-                    ->label('Service')
-                    ->maxLength(255)
-                    ->placeholder('Ex : Radiologie, Hémodialyse, Bloc opératoire…')
-                    ->helperText('Service d’affectation (facultatif — laisser vide pour un Admin).'),
+                Select::make('service_id')
+                    ->label('Service d’affectation')
+                    ->relationship('service', 'nom')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('Aucun')
+                    ->helperText('Obligatoire pour Chef de service et Technicien. Facultatif pour Admin.')
+                    ->required(fn (callable $get): bool => in_array($get('role'), ['Technicien', 'Chef de service']))
+                    ->native(false),
 
                 Toggle::make('actif')
                     ->label('Actif')
