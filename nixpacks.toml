@@ -9,13 +9,12 @@ nixPkgs = [
     "php83Extensions.pdo_mysql",
     "php83Packages.composer",
     "nodejs_20",
-    "nginx",
     "unzip"
 ]
 
 [phases.build]
 cmds = [
-    "composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-intl --ignore-platform-req=ext-zip --no-interaction",
+    "composer install --no-dev --optimize-autoloader --no-interaction",
     "npm install --no-audit --no-fund",
     "npm run build",
     "php artisan config:cache",
