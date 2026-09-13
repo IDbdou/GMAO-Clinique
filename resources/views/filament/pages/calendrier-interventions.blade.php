@@ -102,6 +102,10 @@
                         slotMaxTime: '22:00:00',
                         nowIndicator: true,
                         dayMaxEvents: 4,
+                        // Sans "end", ne pas supposer 1h de duree par defaut : evite
+                        // qu'un evenement demarrant tard (ex: 23h14) ne deborde sur
+                        // le jour suivant dans la vue Mois.
+                        defaultTimedEventDuration: '00:00:00',
                     });
 
                     calendar.render();
