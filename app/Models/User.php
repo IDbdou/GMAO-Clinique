@@ -57,4 +57,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function interventions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Intervention::class, 'technicien_id');
+    }
 }

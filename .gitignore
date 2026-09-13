@@ -25,3 +25,6 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Dossier local du rapport de stage (documents personnels, pas du code applicatif)
+/Besoin de stage/

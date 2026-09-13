@@ -37,7 +37,7 @@ class EquipementsEnPanne extends BaseWidget
                     ->label('Nom')
                     ->searchable(),
 
-                TextColumn::make('service')
+                TextColumn::make('service.nom')
                     ->label('Service')
                     ->placeholder('—'),
 

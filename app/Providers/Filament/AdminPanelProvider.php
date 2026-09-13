@@ -9,7 +9,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -28,8 +27,14 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->brandName('GMAO Clinique')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => '#0ea5e9',
+                'danger' => '#ef4444',
+                'success' => '#10b981',
+                'warning' => '#f59e0b',
+                'info' => '#6366f1',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -39,10 +44,18 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 \App\Filament\Widgets\GmaoStatsOverview::class,
+                // ─── Graphiques d'analyse ───
+                \App\Filament\Widgets\InterventionsParMoisChart::class,
+                \App\Filament\Widgets\CoutsParMoisChart::class,
+                \App\Filament\Widgets\InterventionsParTypeChart::class,
+                \App\Filament\Widgets\InterventionsParStatutChart::class,
+                \App\Filament\Widgets\TauxDisponibiliteParServiceChart::class,
+                // ─── Alertes & tableaux ───
+                \App\Filament\Widgets\MaintenancesPreventivesAlertes::class,
                 \App\Filament\Widgets\DerniersSignalements::class,
                 \App\Filament\Widgets\EquipementsEnPanne::class,
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                \App\Filament\Widgets\ContratsAlertes::class,
+                \App\Filament\Widgets\SatisfactionTechniciens::class,
             ])
             ->middleware([
                 EncryptCookies::class,

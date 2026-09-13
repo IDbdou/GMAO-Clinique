@@ -8,10 +8,10 @@ use App\Filament\Service\Resources\CompteRendus\CompteRenduResource;
 use App\Models\CompteRendu;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Group;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
@@ -72,7 +72,7 @@ class ValidateCompteRendu extends ViewRecord
                     ]),
 
                 Section::make('Détail des coûts')
-                    ->icon('heroicon-m-currency-dirham')
+                    ->icon('heroicon-m-banknotes')
                     ->columns(4)
                     ->schema([
                         TextEntry::make('temps_passe')
@@ -115,10 +115,12 @@ class ValidateCompteRendu extends ViewRecord
 
         if ($record->statut !== StatutCompteRendu::Soumis) {
             return [
-                Action::make('print')
-                    ->label('Imprimer / PDF')
-                    ->icon('heroicon-m-printer')
-                    ->extraAttributes(['onclick' => 'window.print()']),
+                Action::make('pdf')
+                    ->label('Télécharger le PDF')
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->color('primary')
+                    ->url(fn (): string => route('compte-rendu.pdf', $record))
+                    ->openUrlInNewTab(),
             ];
         }
 

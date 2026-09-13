@@ -20,6 +20,10 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             DemoUserSeeder::class,
             EquipementSeeder::class,
+            DemoGmaoSeeder::class,
+            PlanningPreventifSeeder::class,
+            ContratMaintenanceSeeder::class,
+            SatisfactionInterventionSeeder::class,
         ]);
     }
 }

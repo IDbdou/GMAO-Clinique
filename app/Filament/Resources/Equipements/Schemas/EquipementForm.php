@@ -18,6 +18,8 @@ class EquipementForm
         return $schema
             ->components([
                 Section::make('Identification')
+                    ->description('Informations principales de l\'équipement')
+                    ->icon('heroicon-m-cpu-chip')
                     ->columns(2)
                     ->schema([
                         TextInput::make('nom')
@@ -49,6 +51,8 @@ class EquipementForm
                     ]),
 
                 Section::make('Affectation & état')
+                    ->description('Service, localisation et criticité')
+                    ->icon('heroicon-m-building-office-2')
                     ->columns(2)
                     ->schema([
                         Select::make('service_id')
@@ -85,6 +89,8 @@ class EquipementForm
                     ]),
 
                 Section::make('Notes')
+                    ->description('Informations complémentaires')
+                    ->icon('heroicon-m-pencil-square')
                     ->schema([
                         Textarea::make('notes')
                             ->label('Notes')

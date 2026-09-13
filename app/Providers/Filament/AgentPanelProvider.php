@@ -25,10 +25,15 @@ class AgentPanelProvider extends PanelProvider
         return $panel
             ->id('agent')
             ->path('agent')
-            ->brandName('GMAO — Espace Agent')
+            ->brandName('GMAO Clinique — Espace Agent')
+            ->viteTheme('resources/css/filament/agent/theme.css')
             ->login()
             ->colors([
-                'primary' => Color::Teal,
+                'primary' => '#0ea5e9',
+                'danger' => '#ef4444',
+                'success' => '#10b981',
+                'warning' => '#f59e0b',
+                'info' => '#6366f1',
             ])
             ->discoverResources(in: app_path('Filament/Agent/Resources'), for: 'App\Filament\Agent\Resources')
             ->discoverPages(in: app_path('Filament/Agent/Pages'), for: 'App\Filament\Agent\Pages')

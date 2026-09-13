@@ -9,7 +9,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -25,10 +24,15 @@ class ServicePanelProvider extends PanelProvider
         return $panel
             ->id('service')
             ->path('service')
-            ->brandName('GMAO — Espace Chef de service')
+            ->brandName('GMAO Clinique — Chef de service')
+            ->viteTheme('resources/css/filament/service/theme.css')
             ->login()
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => '#0ea5e9',
+                'danger' => '#ef4444',
+                'success' => '#10b981',
+                'warning' => '#f59e0b',
+                'info' => '#6366f1',
             ])
             ->discoverResources(in: app_path('Filament/Service/Resources'), for: 'App\Filament\Service\Resources')
             ->discoverPages(in: app_path('Filament/Service/Pages'), for: 'App\Filament\Service\Pages')
@@ -37,7 +41,9 @@ class ServicePanelProvider extends PanelProvider
             ])
             ->widgets([
                 \App\Filament\Service\Widgets\ServiceStatsOverview::class,
-                AccountWidget::class,
+                // ─── Graphiques d'analyse ───
+                \App\Filament\Service\Widgets\SignalementsParMoisChart::class,
+                \App\Filament\Service\Widgets\StatutSignalementsChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

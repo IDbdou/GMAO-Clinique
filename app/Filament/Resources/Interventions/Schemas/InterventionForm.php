@@ -20,6 +20,8 @@ class InterventionForm
         return $schema
             ->components([
                 Section::make('Intervention')
+                    ->description('Identification et catégorisation de l\'intervention')
+                    ->icon('heroicon-m-wrench-screwdriver')
                     ->columns(2)
                     ->schema([
                         Select::make('equipement_id')
@@ -102,6 +104,8 @@ class InterventionForm
                     ]),
 
                 Section::make('Planification & suivi')
+                    ->description('Dates, coûts et rapport technique')
+                    ->icon('heroicon-m-calendar-days')
                     ->columns(2)
                     ->schema([
                         DateTimePicker::make('date_demande')

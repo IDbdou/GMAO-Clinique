@@ -54,4 +54,9 @@ class Intervention extends Model
     {
         return $this->hasOne(CompteRendu::class);
     }
+
+    public function satisfaction(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SatisfactionIntervention::class);
+    }
 }

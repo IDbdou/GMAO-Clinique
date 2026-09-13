@@ -9,6 +9,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 
 class EquipementsTable
@@ -16,6 +17,13 @@ class EquipementsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('nom', 'asc')
+            ->groups([
+                Group::make('service.nom')
+                    ->getTitleFromRecordUsing(fn ($record) => $record->service?->nom ?? 'Sans service')
+                    ->collapsible()
+                    ->getDescriptionFromRecordUsing(fn ($record): string => 'Localisation : ' . ($record->localisation ?? '—')),
+            ])
             ->columns([
                 TextColumn::make('code_inventaire')
                     ->label('Code')
@@ -27,10 +35,28 @@ class EquipementsTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('marque')
+                    ->label('Marque')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+
+                TextColumn::make('modele')
+                    ->label('Modèle')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+
                 TextColumn::make('service.nom')
                     ->label('Service')
                     ->searchable()
                     ->placeholder('—')
+                    ->toggleable(),
+
+                TextColumn::make('localisation')
+                    ->label('Localisation')
+                    ->placeholder('—')
+                    ->sortable()
                     ->toggleable(),
 
                 TextColumn::make('criticite')
@@ -44,15 +70,23 @@ class EquipementsTable
                     ->sortable(),
 
                 TextColumn::make('interventions_count')
-                    ->label('Interv.')
+                    ->label('Interventions')
                     ->counts('interventions')
                     ->badge()
                     ->color('gray')
+                    ->sortable()
                     ->toggleable(),
 
                 TextColumn::make('date_mise_en_service')
                     ->label('Mise en service')
                     ->date('d/m/Y')
+                    ->placeholder('—')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('fournisseur')
+                    ->label('Fournisseur')
+                    ->searchable()
                     ->placeholder('—')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

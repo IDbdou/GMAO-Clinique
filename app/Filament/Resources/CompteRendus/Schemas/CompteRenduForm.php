@@ -21,6 +21,8 @@ class CompteRenduForm
         return $schema
             ->components([
                 Section::make('Identification')
+                    ->description('Intervention concernée et technicien responsable')
+                    ->icon('heroicon-m-identification')
                     ->columns(2)
                     ->schema([
                         Select::make('intervention_id')
@@ -53,6 +55,8 @@ class CompteRenduForm
                     ]),
 
                 Section::make('Questionnaire technique')
+                    ->description('Détails de l\'intervention et coûts associés')
+                    ->icon('heroicon-m-wrench-screwdriver')
                     ->columns(2)
                     ->schema([
                         Textarea::make('observations')
@@ -97,6 +101,8 @@ class CompteRenduForm
                     ]),
 
                 Section::make('Signature numérique du technicien')
+                    ->description('Identification du rédacteur et horodatage')
+                    ->icon('heroicon-m-pencil-square')
                     ->schema([
                         TextInput::make('signature_technicien')
                             ->label('Nom et prénom du technicien')
