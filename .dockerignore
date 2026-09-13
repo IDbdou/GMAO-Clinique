@@ -1,0 +1,26 @@
+# Ignore les fichiers inutiles pour Docker
+node_modules
+vendor
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+*.log
+storage/*.key
+storage/pail
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+bootstrap/cache/*.php
+public/storage
+public/hot
+public/build
+.idea
+.vscode
+.cursor
+*.md
+!README.md
+.claude
+Besoin\ de\ stage
