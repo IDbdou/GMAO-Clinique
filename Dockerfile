@@ -20,11 +20,14 @@ COPY artisan ./
 # Installer les dépendances PHP (sans scripts pour éviter les erreurs Laravel pendant le build)
 RUN composer install --ignore-platform-reqs --optimize-autoloader --no-interaction --no-scripts
 
-# Installer les dépendances Node et build les assets
-RUN npm ci --ignore-scripts && npm run build
+# Installer les dépendances Node (sans builder tant que le code source n'est pas copié)
+RUN npm ci --ignore-scripts
 
-# Copier le reste du code
+# Copier le reste du code (vite.config.js, resources/, etc. nécessaires au build)
 COPY . .
+
+# Build les assets front (vite.config.js et resources/ sont maintenant présents)
+RUN npm run build
 
 # Post-install Laravel
 RUN php artisan config:cache \
