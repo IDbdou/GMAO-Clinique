@@ -3,7 +3,11 @@
 namespace App\Filament\Pages;
 
 use App\Enums\StatutIntervention;
-use App\Models\Intervention;
+use App\Enums\TypeIntervention;
+use App\Filament\Resources\Interventions\InterventionResource;
+use App\Models\Equipement;
+use App\Models\User;
+use App\Support\Calendar\InterventionColorResolver;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 
@@ -21,85 +25,51 @@ class CalendrierInterventions extends Page
 
     protected static ?int $navigationSort = 10;
 
-    public array $interventions = [];
+    public array $statutOptions = [];
+
+    public array $typeOptions = [];
+
+    public array $technicienOptions = [];
+
+    public array $equipementOptions = [];
+
+    public string $eventsUrl = '';
+
+    public string $rescheduleUrlTemplate = '';
+
+    public string $createUrl = '';
 
     public function mount(): void
     {
-        $this->interventions = $this->getInterventionsData();
-    }
+        $this->eventsUrl = route('admin.calendrier.events');
+        $this->rescheduleUrlTemplate = route('admin.calendrier.reschedule', ['intervention' => '__ID__']);
+        $this->createUrl = InterventionResource::getUrl('create');
 
-    protected function getInterventionsData(): array
-    {
-        return Intervention::with(['equipement', 'technicien', 'service'])
-            ->get()
-            ->map(function (Intervention $i) {
-                $start = $i->date_planifiee ?? $i->date_demande ?? $i->created_at;
+        $this->statutOptions = collect(StatutIntervention::cases())
+            ->map(fn (StatutIntervention $statut) => [
+                'value' => $statut->value,
+                'label' => $statut->getLabel(),
+                'color' => InterventionColorResolver::hex($statut->getColor()),
+            ])
+            ->all();
 
-                if (! $start) {
-                    return null;
-                }
+        $this->typeOptions = collect(TypeIntervention::cases())
+            ->map(fn (TypeIntervention $type) => [
+                'value' => $type->value,
+                'label' => $type->getLabel(),
+                'color' => InterventionColorResolver::hex($type->getColor()),
+            ])
+            ->all();
 
-                // Si l'intervention se termine un autre jour calendaire que son début,
-                // on l'affiche en "toute la journée" confinée à son jour de début
-                // (évite que la barre déborde sur les jours suivants en vue Mois).
-                // Note : diffInHours() de Carbon renvoie une valeur signée depuis Carbon 3,
-                // on compare donc les jours calendaires plutôt qu'un nombre d'heures.
-                $end = $i->date_fin;
-                if ($end && ! $start->isSameDay($end)) {
-                    // All-day : on utilise start (jour courant)
-                    return [
-                        'id' => $i->id,
-                        'title' => $i->titre,
-                        'start' => $start->toDateString(),
-                        'allDay' => true,
-                        'color' => match ($i->statut) {
-                            StatutIntervention::Terminee => '#22c55e',
-                            StatutIntervention::EnCours => '#f59e0b',
-                            StatutIntervention::Ouverte => '#3b82f6',
-                            StatutIntervention::EnAttente => '#6b7280',
-                            StatutIntervention::Annulee => '#ef4444',
-                            default => '#a855f7',
-                        },
-                        'textColor' => '#fff',
-                        'extendedProps' => [
-                            'equipement' => $i->equipement?->nom ?? '—',
-                            'technicien' => $i->technicien?->name ?? 'Non assigné',
-                            'service' => $i->service?->nom ?? '—',
-                            'statut' => $i->statut->getLabel(),
-                            'priorite' => $i->priorite->getLabel(),
-                            'type' => $i->type->getLabel(),
-                            'description' => $i->description ?? '—',
-                        ],
-                    ];
-                }
+        $this->technicienOptions = User::role('Technicien')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (User $u) => ['value' => $u->id, 'label' => $u->name])
+            ->all();
 
-                return [
-                    'id' => $i->id,
-                    'title' => $i->titre,
-                    'start' => $start->toDateTimeString(),
-                    'end' => $end?->toDateTimeString(),
-                    'color' => match ($i->statut) {
-                        StatutIntervention::Terminee => '#22c55e',
-                        StatutIntervention::EnCours => '#f59e0b',
-                        StatutIntervention::Ouverte => '#3b82f6',
-                        StatutIntervention::EnAttente => '#6b7280',
-                        StatutIntervention::Annulee => '#ef4444',
-                        default => '#a855f7',
-                    },
-                    'textColor' => '#fff',
-                    'extendedProps' => [
-                        'equipement' => $i->equipement?->nom ?? '—',
-                        'technicien' => $i->technicien?->name ?? 'Non assigné',
-                        'service' => $i->service?->nom ?? '—',
-                        'statut' => $i->statut->getLabel(),
-                        'priorite' => $i->priorite->getLabel(),
-                        'type' => $i->type->getLabel(),
-                        'description' => $i->description ?? '—',
-                    ],
-                ];
-            })
-            ->filter()
-            ->values()
-            ->toArray();
+        $this->equipementOptions = Equipement::orderBy('nom')
+            ->get(['id', 'nom'])
+            ->map(fn (Equipement $e) => ['value' => $e->id, 'label' => $e->nom])
+            ->all();
     }
 }

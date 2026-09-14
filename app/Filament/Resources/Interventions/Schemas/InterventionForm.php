@@ -117,7 +117,11 @@ class InterventionForm
                         DateTimePicker::make('date_planifiee')
                             ->label('Date planifiée')
                             ->native(false)
-                            ->displayFormat('d/m/Y H:i'),
+                            ->displayFormat('d/m/Y H:i')
+                            // Pre-rempli lors d'une creation rapide depuis un
+                            // clic sur une case vide du calendrier (voir
+                            // resources/js/calendar/index.js -> buildCreateUrl).
+                            ->default(fn () => request()->query('date_planifiee')),
 
                         DateTimePicker::make('date_debut')
                             ->label('Début')

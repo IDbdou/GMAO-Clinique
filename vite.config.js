@@ -12,6 +12,8 @@ export default defineConfig({
                 'resources/css/filament/admin/theme.css',
                 'resources/css/filament/service/theme.css',
                 'resources/css/filament/agent/theme.css',
+                'resources/css/calendar.css',
+                'resources/js/calendar/index.js',
             ],
             refresh: true,
             fonts: [
