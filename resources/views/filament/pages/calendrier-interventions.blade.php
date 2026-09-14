@@ -64,10 +64,21 @@
             </div>
         </div>
 
+        {{-- Interventions non planifiées (glisser sur le calendrier pour les programmer) --}}
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm" data-unscheduled-panel hidden>
+            <div class="mb-2 flex items-center gap-2">
+                <h2 class="text-sm font-bold text-slate-900">Non planifiées</h2>
+                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500" data-unscheduled-count>0</span>
+            </div>
+            <p class="mb-3 text-xs text-slate-500">Glissez une carte sur une case du calendrier pour la programmer.</p>
+            <div class="gmao-unscheduled-list" data-unscheduled-list></div>
+        </div>
+
         {{-- Calendrier --}}
         @php
             $gmaoCalendarConfig = [
                 'eventsUrl' => $this->eventsUrl,
+                'unscheduledUrl' => $this->unscheduledUrl,
                 'rescheduleUrlTemplate' => $this->rescheduleUrlTemplate,
                 'createUrl' => $this->createUrl,
                 'csrfToken' => csrf_token(),
@@ -80,6 +91,12 @@
             <div data-calendar-mount></div>
         </div>
 
+    </div>
+
+    {{-- Popup d'aperçu au survol d'une intervention --}}
+    <div id="gmao-event-popup" class="gmao-popup" hidden>
+        <div class="gmao-popup__title" data-popup-title></div>
+        <div class="gmao-popup__body" data-popup-body></div>
     </div>
 
     @vite(['resources/css/calendar.css', 'resources/js/calendar/index.js'])

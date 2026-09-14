@@ -13,8 +13,11 @@ class InterventionEventFormatter
 {
     public static function toEvent(Intervention $intervention): ?array
     {
-        $start = $intervention->date_planifiee ?? $intervention->date_demande ?? $intervention->created_at;
+        $start = $intervention->date_planifiee;
 
+        // Sans date planifiee, l'intervention n'a pas sa place sur une case
+        // du calendrier : elle apparait dans la liste "Non planifiees" a la
+        // place (voir InterventionCalendarController::unscheduled()).
         if (! $start) {
             return null;
         }
@@ -50,6 +53,27 @@ class InterventionEventFormatter
                 'description' => $intervention->description ?? '—',
                 'hasEnd' => $end !== null,
             ],
+        ];
+    }
+
+    /**
+     * Representation compacte d'une intervention sans date planifiee, pour
+     * la liste "Non planifiees" (source de drag & drop vers le calendrier).
+     */
+    public static function toUnscheduled(Intervention $intervention): array
+    {
+        $demande = $intervention->date_demande ?? $intervention->created_at;
+
+        return [
+            'id' => $intervention->id,
+            'title' => $intervention->titre,
+            'color' => InterventionColorResolver::hex($intervention->statut->getColor()),
+            'equipement' => $intervention->equipement?->nom ?? '—',
+            'service' => $intervention->service?->nom ?? '—',
+            'statutLabel' => $intervention->statut->getLabel(),
+            'priorite' => $intervention->priorite->getLabel(),
+            'typeLabel' => $intervention->type->getLabel(),
+            'demandeLabel' => $demande?->translatedFormat('d M Y') ?? '—',
         ];
     }
 }

@@ -2,7 +2,7 @@ import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
+import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import frLocale from '@fullcalendar/core/locales/fr';
 
 // ---------------------------------------------------------------------
@@ -130,6 +130,124 @@ export function initGmaoCalendar(root, config) {
             });
     }
 
+    // --- Popup d'apercu au survol (avant meme de cliquer) ------------------
+    const popupEl = document.getElementById('gmao-event-popup');
+    const popupTitleEl = popupEl?.querySelector('[data-popup-title]');
+    const popupBodyEl = popupEl?.querySelector('[data-popup-body]');
+
+    function popupRow(label, value) {
+        return `<span class="gmao-popup__label">${label}</span><span>${value}</span>`;
+    }
+
+    function showEventPopup(info) {
+        if (! popupEl) {
+            return;
+        }
+
+        const props = info.event.extendedProps;
+        const color = info.event.backgroundColor || info.event.color;
+        const fmt = (date) => (date ? `${date.toLocaleDateString('fr-FR')} à ${formatTime(date)}` : '—');
+
+        popupTitleEl.textContent = info.event.title;
+        popupTitleEl.style.borderColor = color;
+
+        popupBodyEl.innerHTML = `
+            <div class="gmao-popup__grid">
+                ${popupRow('Équipement', escapeHtml(props.equipement))}
+                ${popupRow('Service', escapeHtml(props.service))}
+                ${popupRow('Technicien', escapeHtml(props.technicien))}
+                ${popupRow('Statut', `<span class="gmao-popup__badge" style="background-color:${color}20;color:${color};border:1px solid ${color}40;">${escapeHtml(props.statutLabel)}</span>`)}
+                ${popupRow('Priorité', escapeHtml(props.priorite))}
+                ${popupRow('Type', escapeHtml(props.typeLabel))}
+                ${popupRow('Début', fmt(info.event.start))}
+                ${popupRow('Fin', fmt(info.event.end))}
+            </div>
+            <div class="gmao-popup__description">
+                <span class="gmao-popup__label">Description</span>
+                <p>${escapeHtml(props.description)}</p>
+            </div>
+        `;
+
+        positionPopup(info.jsEvent);
+        popupEl.hidden = false;
+    }
+
+    function positionPopup(jsEvent) {
+        const width = 320;
+        let left = jsEvent.clientX + 16;
+        let top = jsEvent.clientY + 16;
+
+        if (left + width > window.innerWidth - 16) {
+            left = jsEvent.clientX - width - 16;
+        }
+
+        if (top + 280 > window.innerHeight - 16) {
+            top = window.innerHeight - 296;
+        }
+
+        if (top < 16) {
+            top = 16;
+        }
+
+        popupEl.style.left = `${Math.max(16, left)}px`;
+        popupEl.style.top = `${top}px`;
+    }
+
+    function hideEventPopup() {
+        if (popupEl) {
+            popupEl.hidden = true;
+        }
+    }
+
+    // --- Interventions non planifiees (source de drag & drop) --------------
+    const unscheduledPanelEl = document.querySelector('[data-unscheduled-panel]');
+    const unscheduledListEl = document.querySelector('[data-unscheduled-list]');
+    const unscheduledCountEl = document.querySelector('[data-unscheduled-count]');
+
+    function renderUnscheduled(items) {
+        if (! unscheduledListEl || ! unscheduledPanelEl) {
+            return;
+        }
+
+        unscheduledListEl.innerHTML = items.map((item) => `
+            <div class="gmao-unscheduled-item" data-id="${item.id}" data-title="${escapeHtml(item.title)}" style="border-left-color:${item.color}">
+                <div class="gmao-unscheduled-item__title">${escapeHtml(item.title)}</div>
+                <div class="gmao-unscheduled-item__meta">${escapeHtml(item.equipement)} · demandée le ${escapeHtml(item.demandeLabel)}</div>
+            </div>
+        `).join('');
+
+        if (unscheduledCountEl) {
+            unscheduledCountEl.textContent = items.length;
+        }
+
+        unscheduledPanelEl.hidden = items.length === 0;
+    }
+
+    function reloadUnscheduled() {
+        if (! config.unscheduledUrl) {
+            return;
+        }
+
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, values]) => values.forEach((v) => params.append(key, v)));
+
+        fetch(`${config.unscheduledUrl}?${params.toString()}`, { headers: { Accept: 'application/json' } })
+            .then((response) => (response.ok ? response.json() : []))
+            .then(renderUnscheduled)
+            .catch(() => {});
+    }
+
+    if (unscheduledListEl) {
+        new Draggable(unscheduledListEl, {
+            itemSelector: '.gmao-unscheduled-item',
+            eventData: (el) => ({
+                id: el.dataset.id,
+                title: el.dataset.title,
+                duration: '00:30',
+            }),
+        });
+    }
+
     function markTodayInListView() {
         const header = calendarEl.querySelector('.fc-list-day.fc-day-today .fc-list-day-text');
 
@@ -200,6 +318,7 @@ export function initGmaoCalendar(root, config) {
         eventDurationEditable: true,
         eventResizableFromStart: false,
         selectable: true,
+        droppable: true,
         navLinks: true,
         navLinkDayClick: (date) => calendar.changeView('timeGridWeek', date),
         moreLinkClick: (arg) => {
@@ -228,13 +347,47 @@ export function initGmaoCalendar(root, config) {
         },
         eventDrop: reschedule,
         eventResize: reschedule,
+        eventReceive: (info) => {
+            // Carte "Non planifiee" deposee sur le calendrier : on la
+            // programme via l'API, puis on laisse le refetch normal
+            // reprendre la main (l'evenement temporaire est retire).
+            const start = info.event.allDay ? `${info.event.startStr}T09:00:00` : info.event.startStr;
+            const url = config.rescheduleUrlTemplate.replace('__ID__', info.event.id);
+
+            fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': config.csrfToken,
+                },
+                body: JSON.stringify({ start, end: null }),
+            })
+                .then((response) => {
+                    if (! response.ok) {
+                        throw new Error('schedule failed');
+                    }
+
+                    info.event.remove();
+                    calendar.refetchEvents();
+                    reloadUnscheduled();
+                })
+                .catch(() => {
+                    info.event.remove();
+                    window.alert("Impossible de programmer l'intervention. Réessayez.");
+                });
+        },
         eventDidMount: (info) => {
             info.el.setAttribute('title', `${info.event.title} — ${info.event.extendedProps.statutLabel}`);
         },
+        eventMouseEnter: showEventPopup,
+        eventMouseLeave: hideEventPopup,
         eventsSet: markTodayInListView,
+        datesSet: hideEventPopup,
     });
 
     calendar.render();
+    reloadUnscheduled();
 
     // Bascule Semaine <-> Jour automatiquement au franchissement du
     // breakpoint mobile pendant que la page reste ouverte.
@@ -285,6 +438,7 @@ export function initGmaoCalendar(root, config) {
         select.addEventListener('change', () => {
             filters[select.dataset.filter] = Array.from(select.selectedOptions).map((o) => o.value);
             calendar.refetchEvents();
+            reloadUnscheduled();
         });
     });
 

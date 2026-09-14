@@ -35,6 +35,8 @@ class CalendrierInterventions extends Page
 
     public string $eventsUrl = '';
 
+    public string $unscheduledUrl = '';
+
     public string $rescheduleUrlTemplate = '';
 
     public string $createUrl = '';
@@ -42,6 +44,7 @@ class CalendrierInterventions extends Page
     public function mount(): void
     {
         $this->eventsUrl = route('admin.calendrier.events');
+        $this->unscheduledUrl = route('admin.calendrier.unscheduled');
         $this->rescheduleUrlTemplate = route('admin.calendrier.reschedule', ['intervention' => '__ID__']);
         $this->createUrl = InterventionResource::getUrl('create');
 

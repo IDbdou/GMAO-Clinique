@@ -19,5 +19,6 @@ Route::middleware(['auth'])->group(function () {
 // explicitement dans le controleur (voir authorizeAdminPanel()).
 Route::prefix('admin/calendrier')->name('admin.calendrier.')->group(function () {
     Route::get('/events', [InterventionCalendarController::class, 'events'])->name('events');
+    Route::get('/unscheduled', [InterventionCalendarController::class, 'unscheduled'])->name('unscheduled');
     Route::patch('/interventions/{intervention}', [InterventionCalendarController::class, 'reschedule'])->name('reschedule');
 });

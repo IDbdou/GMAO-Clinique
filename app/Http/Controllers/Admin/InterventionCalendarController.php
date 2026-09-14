@@ -8,12 +8,9 @@ use App\Support\Calendar\InterventionEventFormatter;
 use Filament\Facades\Filament;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class InterventionCalendarController extends Controller
 {
-    private const DATE_EXPR = 'COALESCE(date_planifiee, date_demande, created_at)';
-
     private function authorizeAdminPanel(Request $request): void
     {
         abort_unless($request->user(), 401);
@@ -21,20 +18,8 @@ class InterventionCalendarController extends Controller
         abort_unless($request->user()->canAccessPanel(Filament::getPanel('admin')), 403);
     }
 
-    public function events(Request $request): JsonResponse
+    private function applyCommonFilters(\Illuminate\Database\Eloquent\Builder $query, Request $request): void
     {
-        $this->authorizeAdminPanel($request);
-
-        $query = Intervention::with(['equipement', 'technicien', 'service']);
-
-        if ($request->filled('start')) {
-            $query->whereRaw(self::DATE_EXPR.' >= ?', [$request->date('start')]);
-        }
-
-        if ($request->filled('end')) {
-            $query->whereRaw(self::DATE_EXPR.' < ?', [$request->date('end')]);
-        }
-
         if ($types = $request->query('type')) {
             $query->whereIn('type', (array) $types);
         }
@@ -50,6 +35,24 @@ class InterventionCalendarController extends Controller
         if ($equipementIds = $request->query('equipement_id')) {
             $query->whereIn('equipement_id', (array) $equipementIds);
         }
+    }
+
+    public function events(Request $request): JsonResponse
+    {
+        $this->authorizeAdminPanel($request);
+
+        $query = Intervention::with(['equipement', 'technicien', 'service'])
+            ->whereNotNull('date_planifiee');
+
+        if ($request->filled('start')) {
+            $query->where('date_planifiee', '>=', $request->date('start'));
+        }
+
+        if ($request->filled('end')) {
+            $query->where('date_planifiee', '<', $request->date('end'));
+        }
+
+        $this->applyCommonFilters($query, $request);
 
         $events = $query->get()
             ->map(fn (Intervention $i) => InterventionEventFormatter::toEvent($i))
@@ -57,6 +60,24 @@ class InterventionCalendarController extends Controller
             ->values();
 
         return response()->json($events);
+    }
+
+    public function unscheduled(Request $request): JsonResponse
+    {
+        $this->authorizeAdminPanel($request);
+
+        $query = Intervention::with(['equipement', 'technicien', 'service'])
+            ->whereNull('date_planifiee');
+
+        $this->applyCommonFilters($query, $request);
+
+        $interventions = $query
+            ->orderByRaw('COALESCE(date_demande, created_at) asc')
+            ->get()
+            ->map(fn (Intervention $i) => InterventionEventFormatter::toUnscheduled($i))
+            ->values();
+
+        return response()->json($interventions);
     }
 
     public function reschedule(Request $request, Intervention $intervention): JsonResponse
