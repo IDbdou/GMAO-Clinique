@@ -4,7 +4,6 @@ namespace App\Filament\Resources\CompteRendus\Schemas;
 
 use App\Enums\StatutCompteRendu;
 use App\Models\Intervention;
-use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;

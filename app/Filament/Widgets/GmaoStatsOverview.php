@@ -6,7 +6,6 @@ use App\Enums\StatutEquipement;
 use App\Enums\StatutIntervention;
 use App\Models\Equipement;
 use App\Models\Intervention;
-use Filament\Support\Colors\Color;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 

@@ -29,25 +29,4 @@ class SatisfactionIntervention extends Model
     {
         return $this->belongsTo(User::class, 'evaluateur_id');
     }
-
-    /**
-     * Retourne la note sous forme d'étoiles.
-     */
-    public function etoiles(): string
-    {
-        return str_repeat('★', $this->note) . str_repeat('☆', 5 - $this->note);
-    }
-
-    /**
-     * Couleur en fonction de la note.
-     */
-    public function couleur(): string
-    {
-        return match ($this->note) {
-            5 => 'success',
-            4 => 'info',
-            3 => 'warning',
-            default => 'danger',
-        };
-    }
 }

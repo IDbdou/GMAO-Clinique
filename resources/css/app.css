@@ -17,16 +17,11 @@
     --color-fg: var(--fg);
     --color-fg-2: var(--fg-2);
     --color-muted: var(--muted);
-    --color-meta: var(--meta);
     --color-border: var(--border);
     --color-border-soft: var(--border-soft);
     --color-accent: var(--accent);
     --color-accent-on: var(--accent-on);
     --color-accent-hover: var(--accent-hover);
-    --color-accent-active: var(--accent-active);
-    --color-success: var(--success);
-    --color-warn: var(--warn);
-    --color-danger: var(--danger);
 
     /* Typography */
     --text-xs: var(--text-xs);
@@ -39,11 +34,7 @@
     --text-4xl: var(--text-4xl);
 
     /* Leading */
-    --leading-body: var(--leading-body);
     --leading-tight: var(--leading-tight);
-
-    /* Tracking */
-    --tracking-display: var(--tracking-display);
 
     /* Spacing */
     --spacing-1: var(--space-1);
@@ -56,19 +47,5 @@
     --spacing-12: var(--space-12);
 
     /* Radius */
-    --radius-sm: var(--radius-sm);
-    --radius-md: var(--radius-md);
     --radius-lg: var(--radius-lg);
-    --radius-pill: var(--radius-pill);
-
-    /* Shadows */
-    --shadow-flat: var(--elev-flat);
-    --shadow-ring: var(--elev-ring);
-    --shadow-raised: var(--elev-raised);
-    --shadow-focus-ring: var(--focus-ring);
-
-    /* Motion */
-    --duration-fast: var(--motion-fast);
-    --duration-base: var(--motion-base);
-    --ease-standard: var(--ease-standard);
 }

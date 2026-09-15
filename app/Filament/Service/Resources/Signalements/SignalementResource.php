@@ -3,12 +3,9 @@
 namespace App\Filament\Service\Resources\Signalements;
 
 use App\Enums\PrioriteIntervention;
-use App\Enums\StatutIntervention;
-use App\Enums\TypeIntervention;
 use App\Filament\Service\Resources\Signalements\Pages\CreateSignalement;
 use App\Filament\Service\Resources\Signalements\Pages\ListSignalements;
 use App\Filament\Service\Resources\Signalements\Pages\ViewSignalement;
-use App\Models\Equipement;
 use App\Models\Intervention;
 use BackedEnum;
 use Filament\Resources\Resource;
