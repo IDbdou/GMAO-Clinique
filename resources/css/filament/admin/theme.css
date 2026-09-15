@@ -2,3 +2,16 @@
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
+
+/* Evite le zoom automatique de Safari iOS au focus d'un champ (se declenche
+   des que la taille de police d'un input est inferieure a 16px). */
+@media (max-width: 640px) {
+    .fi-input,
+    .fi-select-input,
+    .fi-textarea-input,
+    select,
+    textarea,
+    input {
+        font-size: 16px !important;
+    }
+}

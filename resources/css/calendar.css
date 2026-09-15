@@ -44,6 +44,103 @@
     box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
+/* --- Filtres : bascule select natif (desktop) / menu a cases (mobile) ------ */
+
+.gmao-filter {
+    position: relative;
+}
+
+/* Desktop (>= 768px) : select natif visible, menu tactile masque. */
+.gmao-filter__mobile {
+    display: none;
+}
+
+.gmao-filter__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 44px;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.gmao-filter__toggle:focus-visible {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+.gmao-filter__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background: #0ea5e9;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0 0.35rem;
+}
+
+.gmao-filter__panel {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + 0.375rem);
+    left: 0;
+    right: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.25);
+    padding: 0.5rem;
+}
+
+.gmao-filter__option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    padding: 0 0.5rem;
+    font-size: 0.85rem;
+    color: #334155;
+    border-radius: 0.5rem;
+}
+
+.gmao-filter__option:active {
+    background: #f1f5f9;
+}
+
+.gmao-filter__option input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+    /* Specificite superieure a ".gmao-calendar-filters label" (definie plus
+       haut) pour etre certain de l'emporter sur le select natif desktop. */
+    .gmao-calendar-filters .gmao-filter__native-label {
+        display: none;
+    }
+
+    .gmao-filter__mobile {
+        display: block;
+    }
+}
+
 /* --- Conteneur calendrier -------------------------------------------------- */
 
 .gmao-calendar-shell .fc {

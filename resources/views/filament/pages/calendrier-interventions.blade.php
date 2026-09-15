@@ -29,38 +29,43 @@
         {{-- Filtres --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div class="gmao-calendar-filters">
-                <label>
-                    Type
-                    <select multiple data-filter="type" size="1">
-                        @foreach ($this->typeOptions as $type)
-                            <option value="{{ $type['value'] }}">{{ $type['label'] }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label>
-                    Statut
-                    <select multiple data-filter="statut" size="1">
-                        @foreach ($this->statutOptions as $statut)
-                            <option value="{{ $statut['value'] }}">{{ $statut['label'] }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label>
-                    Technicien
-                    <select multiple data-filter="technicien_id" size="1">
-                        @foreach ($this->technicienOptions as $technicien)
-                            <option value="{{ $technicien['value'] }}">{{ $technicien['label'] }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <label>
-                    Équipement
-                    <select multiple data-filter="equipement_id" size="1">
-                        @foreach ($this->equipementOptions as $equipement)
-                            <option value="{{ $equipement['value'] }}">{{ $equipement['label'] }}</option>
-                        @endforeach
-                    </select>
-                </label>
+                @php
+                    $gmaoFilterGroups = [
+                        ['key' => 'type', 'label' => 'Type', 'options' => $this->typeOptions],
+                        ['key' => 'statut', 'label' => 'Statut', 'options' => $this->statutOptions],
+                        ['key' => 'technicien_id', 'label' => 'Technicien', 'options' => $this->technicienOptions],
+                        ['key' => 'equipement_id', 'label' => 'Équipement', 'options' => $this->equipementOptions],
+                    ];
+                @endphp
+                @foreach ($gmaoFilterGroups as $group)
+                    <div class="gmao-filter" data-filter-group="{{ $group['key'] }}">
+                        {{-- Version desktop : select natif multi-selection (Ctrl/Cmd-clic) --}}
+                        <label class="gmao-filter__native-label">
+                            {{ $group['label'] }}
+                            <select multiple data-filter="{{ $group['key'] }}" size="1" class="gmao-filter__native">
+                                @foreach ($group['options'] as $option)
+                                    <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+
+                        {{-- Version mobile : menu a cases a cocher, plus simple au doigt --}}
+                        <div class="gmao-filter__mobile">
+                            <button type="button" class="gmao-filter__toggle" data-filter-toggle>
+                                {{ $group['label'] }}
+                                <span class="gmao-filter__badge" data-filter-badge hidden>0</span>
+                            </button>
+                            <div class="gmao-filter__panel" data-filter-panel hidden>
+                                @foreach ($group['options'] as $option)
+                                    <label class="gmao-filter__option">
+                                        <input type="checkbox" value="{{ $option['value'] }}">
+                                        <span>{{ $option['label'] }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
 

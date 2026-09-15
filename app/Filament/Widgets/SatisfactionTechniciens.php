@@ -67,7 +67,8 @@ class SatisfactionTechniciens extends BaseWidget
 
                 TextColumn::make('service.nom')
                     ->label('Service affecté')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
             ]);
     }
 }

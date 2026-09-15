@@ -55,7 +55,8 @@ class DerniersSignalements extends BaseWidget
 
                 TextColumn::make('technicien.name')
                     ->label('Technicien')
-                    ->placeholder('Non assigné'),
+                    ->placeholder('Non assigné')
+                    ->toggleable(),
 
                 TextColumn::make('date_demande')
                     ->label('Signalé le')

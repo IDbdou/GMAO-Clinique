@@ -445,7 +445,77 @@ export function initGmaoCalendar(root, config) {
     return calendar;
 }
 
+// ---------------------------------------------------------------------
+// Filtres : sur mobile, un menu a cases a cocher remplace le <select
+// multiple> natif (peu utilisable au doigt, la multi-selection standard
+// exigeant un Ctrl/Cmd-clic). Les cases pilotent le select natif existant
+// puis declenchent son evenement "change" : la logique de filtrage du
+// calendrier (plus bas) n'a donc pas besoin d'etre dupliquee.
+// ---------------------------------------------------------------------
+function initFilterDropdowns() {
+    const groups = document.querySelectorAll('[data-filter-group]');
+
+    if (! groups.length) {
+        return;
+    }
+
+    function closeAllPanels() {
+        document.querySelectorAll('[data-filter-panel]').forEach((panel) => {
+            panel.hidden = true;
+        });
+    }
+
+    groups.forEach((group) => {
+        const select = group.querySelector('[data-filter]');
+        const toggle = group.querySelector('[data-filter-toggle]');
+        const panel = group.querySelector('[data-filter-panel]');
+        const badge = group.querySelector('[data-filter-badge]');
+        const checkboxes = panel ? panel.querySelectorAll('input[type="checkbox"]') : [];
+
+        if (! select || ! toggle || ! panel) {
+            return;
+        }
+
+        function updateBadge() {
+            const count = Array.from(checkboxes).filter((checkbox) => checkbox.checked).length;
+
+            if (badge) {
+                badge.textContent = String(count);
+                badge.hidden = count === 0;
+            }
+        }
+
+        toggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const willOpen = panel.hidden;
+            closeAllPanels();
+            panel.hidden = ! willOpen;
+        });
+
+        panel.addEventListener('click', (event) => event.stopPropagation());
+
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+                Array.from(select.options).forEach((option) => {
+                    if (option.value === checkbox.value) {
+                        option.selected = checkbox.checked;
+                    }
+                });
+
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                updateBadge();
+            });
+        });
+
+        updateBadge();
+    });
+
+    document.addEventListener('click', closeAllPanels);
+}
+
 function boot() {
+    initFilterDropdowns();
+
     const root = document.querySelector('[data-gmao-calendar]');
 
     if (! root) {

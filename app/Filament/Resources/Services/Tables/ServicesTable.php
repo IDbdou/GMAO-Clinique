@@ -38,13 +38,15 @@ class ServicesTable
                     ->label('Équipements')
                     ->counts('equipements')
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->toggleable(),
 
                 TextColumn::make('interventions_count')
                     ->label('Interventions')
                     ->counts('interventions')
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->toggleable(),
 
                 IconColumn::make('actif')
                     ->label('Actif')

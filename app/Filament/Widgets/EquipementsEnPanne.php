@@ -48,7 +48,8 @@ class EquipementsEnPanne extends BaseWidget
 
                 TextColumn::make('localisation')
                     ->label('Localisation')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
             ]);
     }
 }

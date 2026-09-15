@@ -26,15 +26,18 @@ class CompteRendusTable
 
                 TextColumn::make('intervention.equipement.nom')
                     ->label('Équipement')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('intervention.service.nom')
                     ->label('Service')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('technicien.name')
                     ->label('Technicien')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('statut')
                     ->label('Statut')
@@ -44,12 +47,14 @@ class CompteRendusTable
                 TextColumn::make('temps_passe')
                     ->label('Temps')
                     ->suffix(' h')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('cout_total')
                     ->label('Coût total')
                     ->money('MAD')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
 
                 TextColumn::make('date_soumission')
                     ->label('Soumis le')
@@ -58,7 +63,8 @@ class CompteRendusTable
 
                 TextColumn::make('signature_chef_service')
                     ->label('Validé par')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('statut')

@@ -44,7 +44,8 @@ class ContratsAlertes extends BaseWidget
                     ->label('N° contrat')
                     ->searchable()
                     ->fontFamily('mono')
-                    ->size('sm'),
+                    ->size('sm')
+                    ->toggleable(),
 
                 TextColumn::make('type_contrat')
                     ->label('Type')
@@ -54,7 +55,8 @@ class ContratsAlertes extends BaseWidget
                 TextColumn::make('fournisseur')
                     ->label('Fournisseur')
                     ->searchable()
-                    ->wrap(),
+                    ->wrap()
+                    ->toggleable(),
 
                 TextColumn::make('date_fin')
                     ->label('Fin garantie')
@@ -66,7 +68,8 @@ class ContratsAlertes extends BaseWidget
                 TextColumn::make('cout_annuel')
                     ->label('Coût annuel')
                     ->money('MAD')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('joursRestants')
                     ->label('Jours restants')

@@ -27,11 +27,13 @@ class CompteRendusTable
 
                 TextColumn::make('intervention.equipement.nom')
                     ->label('Équipement')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('technicien.name')
                     ->label('Technicien')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('statut')
                     ->label('Statut')
@@ -41,12 +43,14 @@ class CompteRendusTable
                 TextColumn::make('temps_passe')
                     ->label('Temps')
                     ->suffix(' h')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('cout_total')
                     ->label('Coût total')
                     ->money('MAD')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
 
                 TextColumn::make('date_soumission')
                     ->label('Soumis le')

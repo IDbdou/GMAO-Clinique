@@ -55,11 +55,13 @@ class MaintenancesPreventivesAlertes extends BaseWidget
                     ->label('Dernière maintenance')
                     ->date('d/m/Y')
                     ->placeholder('Jamais')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('equipement.service.nom')
                     ->label('Service')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
             ]);
     }
 }
